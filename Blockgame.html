@@ -4,41 +4,12 @@
     <meta charset="UTF-8">
     <title>BlockGame</title>
     <style>
-        body { background: #000; margin: 0; overflow: hidden; }
-        canvas { display: block; margin: 0 auto; background: #111; }
-        #controls {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            z-index: 10;
-        }
-        .button {
-            width: 50px;
-            height: 50px;
-            background: #555;
-            color: #fff;
-            font-size: 24px;
-            text-align: center;
-            line-height: 50px;
-            border-radius: 5px;
-            user-select: none;
-        }
-        .button:active {
-            background: #777;
-        }
+        body { background: #888; margin: 0; overflow: hidden; }
+        canvas { display: block; margin: 0 auto; background: #000; }
     </style>
 </head>
 <body>
 <canvas id="game"></canvas>
-<div id="controls">
-    <div class="button" id="left">←</div>
-    <div class="button" id="rotate">↺</div>
-    <div class="button" id="right">→</div>
-    <div class="button" id="down">↓</div>
-</div>
 <script>
     const canvas = document.getElementById('game');
     const context = canvas.getContext('2d');
@@ -59,7 +30,7 @@
         // グリッドサイズを計算（横幅と縦幅を基準に最小値を採用）
         grid = Math.floor(Math.min(
             canvas.width / COLS,
-            (canvas.height - 100) / ROWS // 100はコントロールボタンの高さを考慮
+            canvas.height / ROWS
         ));
 
         blockSize = grid - 2; // ブロック間に少し隙間を作る
@@ -236,50 +207,52 @@
         }
     }
 
-    // タッチ操作のイベントリスナー
-    function addTouchListener(id, action) {
-        const element = document.getElementById(id);
-        element.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            if (gameOver) return;
-            action();
-        });
-        element.addEventListener('mousedown', function(e) {
-            e.preventDefault();
-            if (gameOver) return;
-            action();
-        });
+    // クリックおよびタッチイベントの処理
+    function handleInput(x, y) {
+        if (gameOver) return;
+
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        if (y < height / 4) {
+            // 上側をタップ：回転
+            const matrix = rotate(piece.matrix);
+            if (isValidMove(matrix, piece.row, piece.col)) {
+                piece.matrix = matrix;
+            }
+        } else if (y > (3 * height) / 4) {
+            // 下側をタップ：下に移動
+            const row = piece.row + 1;
+            if (!isValidMove(piece.matrix, row, piece.col)) {
+                piece.row = row - 1;
+                placePiece();
+                return;
+            }
+            piece.row = row;
+        } else if (x < width / 2) {
+            // 左側をタップ：左に移動
+            const col = piece.col - 1;
+            if (isValidMove(piece.matrix, piece.row, col)) {
+                piece.col = col;
+            }
+        } else {
+            // 右側をタップ：右に移動
+            const col = piece.col + 1;
+            if (isValidMove(piece.matrix, piece.row, col)) {
+                piece.col = col;
+            }
+        }
     }
 
-    addTouchListener('left', function() {
-        const col = piece.col - 1;
-        if (isValidMove(piece.matrix, piece.row, col)) {
-            piece.col = col;
-        }
+    // マウスクリックイベント
+    document.addEventListener('click', function(e) {
+        handleInput(e.clientX, e.clientY);
     });
 
-    addTouchListener('right', function() {
-        const col = piece.col + 1;
-        if (isValidMove(piece.matrix, piece.row, col)) {
-            piece.col = col;
-        }
-    });
-
-    addTouchListener('rotate', function() {
-        const matrix = rotate(piece.matrix);
-        if (isValidMove(matrix, piece.row, piece.col)) {
-            piece.matrix = matrix;
-        }
-    });
-
-    addTouchListener('down', function() {
-        const row = piece.row + 1;
-        if (!isValidMove(piece.matrix, row, piece.col)) {
-            piece.row = row - 1;
-            placePiece();
-            return;
-        }
-        piece.row = row;
+    // タッチイベント
+    document.addEventListener('touchstart', function(e) {
+        const touch = e.touches[0];
+        handleInput(touch.clientX, touch.clientY);
     });
 
     rAF = requestAnimationFrame(loop);
