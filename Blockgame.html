@@ -58,7 +58,7 @@
         }
         const name = sequence.pop();
         const matrix = shapes[name];
-        const col = field[0].length / 2 - Math.ceil(matrix[0].length / 2);
+        const col = Math.floor(field[0].length / 2) - Math.ceil(matrix[0].length / 2);
         const row = -2;
         return {
             name: name,
@@ -68,15 +68,9 @@
         };
     }
     function rotate(matrix) {
-        const N = matrix.length;
-        const result = [];
-        for (let i = 0; i < N; i++) {
-            result[i] = [];
-            for (let j = 0; j < matrix[i].length; j++) {
-                result[i][j] = matrix[matrix.length - j - 1][i];
-            }
-        }
-        return result;
+        return matrix[0].map((_, index) =>
+            matrix.map(row => row[index]).reverse()
+        );
     }
     function isValidMove(matrix, cellRow, cellCol) {
         for (let row = 0; row < matrix.length; row++) {
