@@ -231,14 +231,10 @@
         const width = canvas.width;
         const height = canvas.height;
 
-        if (canvasY < height / 4) {
-            // 上側をタップ：回転
-            const matrix = rotate(piece.matrix);
-            if (isValidMove(matrix, piece.row, piece.col)) {
-                piece.matrix = matrix;
-            }
-        } else if (canvasY > (3 * height) / 4) {
-            // 下側をタップ：下に移動
+        // 優先度順にチェック
+
+        // 下移動：キャンバスの下側1/4
+        if (canvasY > (3 * height) / 4) {
             const row = piece.row + 1;
             if (!isValidMove(piece.matrix, row, piece.col)) {
                 piece.row = row - 1;
@@ -246,18 +242,34 @@
                 return;
             }
             piece.row = row;
-        } else if (canvasX < width / 2) {
-            // 左側をタップ：左に移動
+            return;
+        }
+
+        // 左移動：キャンバスの左側1/3
+        if (canvasX < width / 3) {
             const col = piece.col - 1;
             if (isValidMove(piece.matrix, piece.row, col)) {
                 piece.col = col;
             }
-        } else {
-            // 右側をタップ：右に移動
+            return;
+        }
+
+        // 右移動：キャンバスの右側1/3
+        if (canvasX > (2 * width) / 3) {
             const col = piece.col + 1;
             if (isValidMove(piece.matrix, piece.row, col)) {
                 piece.col = col;
             }
+            return;
+        }
+
+        // ブロック回転：キャンバスの中央1/3
+        if (canvasX >= width / 3 && canvasX <= (2 * width) / 3) {
+            const matrix = rotate(piece.matrix);
+            if (isValidMove(matrix, piece.row, piece.col)) {
+                piece.matrix = matrix;
+            }
+            return;
         }
     }
 
