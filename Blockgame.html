@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <title>BlockGame</title>
     <style>
-        body { background: #888; margin: 0; overflow: hidden; }
-        canvas { display: block; margin: 0 auto; background: #000; }
+        body { background: #ccc; margin: 0; overflow: hidden; }
+        canvas { display: block; margin: 20px auto; background: #000; border: 2px solid #888; }
     </style>
 </head>
 <body>
@@ -23,16 +23,13 @@
 
     // ウィンドウサイズに合わせてキャンバスとグリッドサイズを調整
     function resize() {
-        // キャンバスの幅と高さをウィンドウサイズに合わせて設定
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        // キャンバスのサイズをウィンドウサイズに合わせて設定
+        const minDimension = Math.min(window.innerWidth, window.innerHeight) - 40; // マージンを考慮
+        canvas.width = minDimension;
+        canvas.height = minDimension * (ROWS / COLS);
 
-        // グリッドサイズを計算（横幅と縦幅を基準に最小値を採用）
-        grid = Math.floor(Math.min(
-            canvas.width / COLS,
-            canvas.height / ROWS
-        ));
-
+        // グリッドサイズを計算
+        grid = Math.floor(canvas.width / COLS);
         blockSize = grid - 2; // ブロック間に少し隙間を作る
 
         // キャンバスをクリアして再描画
@@ -173,8 +170,8 @@
                     const name = field[row][col];
                     context.fillStyle = colors[name];
                     context.fillRect(
-                        col * grid,
-                        row * grid,
+                        col * grid + 1,
+                        row * grid + 1,
                         blockSize,
                         blockSize
                     );
@@ -196,8 +193,8 @@
                 for (let col = 0; col < piece.matrix[row].length; col++) {
                     if (piece.matrix[row][col]) {
                         context.fillRect(
-                            (piece.col + col) * grid,
-                            (piece.row + row) * grid,
+                            (piece.col + col) * grid + 1,
+                            (piece.row + row) * grid + 1,
                             blockSize,
                             blockSize
                         );
@@ -211,16 +208,28 @@
     function handleInput(x, y) {
         if (gameOver) return;
 
-        const width = window.innerWidth;
-        const height = window.innerHeight;
+        // キャンバスの境界を取得
+        const rect = canvas.getBoundingClientRect();
 
-        if (y < height / 4) {
+        // クリック／タップ位置をキャンバス内の座標に変換
+        const canvasX = x - rect.left;
+        const canvasY = y - rect.top;
+
+        // キャンバス外の場合は無視
+        if (canvasX < 0 || canvasX > canvas.width || canvasY < 0 || canvasY > canvas.height) {
+            return;
+        }
+
+        const width = canvas.width;
+        const height = canvas.height;
+
+        if (canvasY < height / 4) {
             // 上側をタップ：回転
             const matrix = rotate(piece.matrix);
             if (isValidMove(matrix, piece.row, piece.col)) {
                 piece.matrix = matrix;
             }
-        } else if (y > (3 * height) / 4) {
+        } else if (canvasY > (3 * height) / 4) {
             // 下側をタップ：下に移動
             const row = piece.row + 1;
             if (!isValidMove(piece.matrix, row, piece.col)) {
@@ -229,7 +238,7 @@
                 return;
             }
             piece.row = row;
-        } else if (x < width / 2) {
+        } else if (canvasX < width / 2) {
             // 左側をタップ：左に移動
             const col = piece.col - 1;
             if (isValidMove(piece.matrix, piece.row, col)) {
@@ -244,13 +253,13 @@
         }
     }
 
-    // マウスクリックイベント
-    document.addEventListener('click', function(e) {
+    // キャンバス上でのマウスクリックイベント
+    canvas.addEventListener('click', function(e) {
         handleInput(e.clientX, e.clientY);
     });
 
-    // タッチイベント
-    document.addEventListener('touchstart', function(e) {
+    // キャンバス上でのタッチイベント
+    canvas.addEventListener('touchstart', function(e) {
         const touch = e.touches[0];
         handleInput(touch.clientX, touch.clientY);
     });
