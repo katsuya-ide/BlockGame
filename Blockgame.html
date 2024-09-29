@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <title>BlockGame</title>
     <style>
-        body { background: #ccc; margin: 0; overflow: hidden; }
-        canvas { display: block; margin: 20px auto; background: #000; border: 2px solid #888; }
+        body { background: #fff; margin: 0; overflow: hidden; }
+        canvas { display: block; margin: 0 auto; background: #000; }
     </style>
 </head>
 <body>
@@ -23,13 +23,13 @@
 
     // ウィンドウサイズに合わせてキャンバスとグリッドサイズを調整
     function resize() {
-        // キャンバスのサイズをウィンドウサイズに合わせて設定
-        const minDimension = Math.min(window.innerWidth, window.innerHeight) - 40; // マージンを考慮
-        canvas.width = minDimension;
-        canvas.height = minDimension * (ROWS / COLS);
+        // キャンバスの高さをウィンドウの高さに合わせる
+        canvas.height = window.innerHeight;
+        // キャンバスの幅を縦横比に基づいて計算
+        canvas.width = canvas.height * (COLS / ROWS);
 
         // グリッドサイズを計算
-        grid = Math.floor(canvas.width / COLS);
+        grid = Math.floor(canvas.height / ROWS);
         blockSize = grid - 2; // ブロック間に少し隙間を作る
 
         // キャンバスをクリアして再描画
