@@ -6,10 +6,38 @@
     <style>
         body { background: #000; margin: 0; overflow: hidden; }
         canvas { display: block; margin: 0 auto; background: #111; }
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        .button {
+            width: 50px;
+            height: 50px;
+            background: #555;
+            color: #fff;
+            font-size: 24px;
+            text-align: center;
+            line-height: 50px;
+            border-radius: 5px;
+            user-select: none;
+        }
+        .button:active {
+            background: #777;
+        }
     </style>
 </head>
 <body>
 <canvas id="game" width="200" height="400"></canvas>
+<div id="controls">
+    <div class="button" id="left">←</div>
+    <div class="button" id="rotate">↺</div>
+    <div class="button" id="right">→</div>
+    <div class="button" id="down">↓</div>
+</div>
 <script>
     const canvas = document.getElementById('game');
     const context = canvas.getContext('2d');
@@ -155,32 +183,44 @@
             }
         }
     }
-    document.addEventListener('keydown', function(e) {
+    // キーボードのイベントリスナーを削除
+    // document.addEventListener('keydown', function(e) { ... });
+
+    // タッチ操作のイベントリスナーを追加
+    document.getElementById('left').addEventListener('touchstart', function(e) {
+        e.preventDefault();
         if (gameOver) return;
-        if (e.key === 'ArrowLeft' || e.key === 'Left') {
-            const col = piece.col - 1;
-            if (isValidMove(piece.matrix, piece.row, col)) {
-                piece.col = col;
-            }
-        } else if (e.key === 'ArrowRight' || e.key === 'Right') {
-            const col = piece.col + 1;
-            if (isValidMove(piece.matrix, piece.row, col)) {
-                piece.col = col;
-            }
-        } else if (e.key === 'ArrowUp' || e.key === 'Up') {
-            const matrix = rotate(piece.matrix);
-            if (isValidMove(matrix, piece.row, piece.col)) {
-                piece.matrix = matrix;
-            }
-        } else if (e.key === 'ArrowDown' || e.key === 'Down') {
-            const row = piece.row + 1;
-            if (!isValidMove(piece.matrix, row, piece.col)) {
-                piece.row = row - 1;
-                placePiece();
-                return;
-            }
-            piece.row = row;
+        const col = piece.col - 1;
+        if (isValidMove(piece.matrix, piece.row, col)) {
+            piece.col = col;
         }
+    });
+    document.getElementById('right').addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        if (gameOver) return;
+        const col = piece.col + 1;
+        if (isValidMove(piece.matrix, piece.row, col)) {
+            piece.col = col;
+        }
+    });
+    document.getElementById('rotate').addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        if (gameOver) return;
+        const matrix = rotate(piece.matrix);
+        if (isValidMove(matrix, piece.row, piece.col)) {
+            piece.matrix = matrix;
+        }
+    });
+    document.getElementById('down').addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        if (gameOver) return;
+        const row = piece.row + 1;
+        if (!isValidMove(piece.matrix, row, piece.col)) {
+            piece.row = row - 1;
+            placePiece();
+            return;
+        }
+        piece.row = row;
     });
     rAF = requestAnimationFrame(loop);
 </script>
