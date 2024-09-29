@@ -3,9 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>BlockGame</title>
+    <!-- ビューポートの設定 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <style>
         body { background: #fff; margin: 0; overflow: hidden; }
-        canvas { display: block; margin: 0 auto; background: #000; }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background: #000;
+            /* タッチアクションの無効化 */
+            touch-action: manipulation;
+        }
     </style>
 </head>
 <body>
@@ -255,11 +263,13 @@
 
     // キャンバス上でのマウスクリックイベント
     canvas.addEventListener('click', function(e) {
+        e.preventDefault(); // デフォルトの動作を防ぐ
         handleInput(e.clientX, e.clientY);
     });
 
     // キャンバス上でのタッチイベント
     canvas.addEventListener('touchstart', function(e) {
+        e.preventDefault(); // デフォルトの動作を防ぐ
         const touch = e.touches[0];
         handleInput(touch.clientX, touch.clientY);
     });
